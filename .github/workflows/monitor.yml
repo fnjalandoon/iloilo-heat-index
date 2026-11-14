@@ -1,0 +1,37 @@
+name: Update heat index
+
+on:
+  schedule:
+    - cron: "0 11 * * *"   # 7:00 PM Philippine time
+    - cron: "0 13 * * *"   # 9:00 PM Philippine time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
+          pip install pytesseract pillow
+
+      - name: Download PAGASA image
+        run: |
+          curl -fsSL -A "Mozilla/5.0" -o HeatIndexObserved.png \
+            https://pubfiles.pagasa.dost.gov.ph/iaas/heat_index/HeatIndexObserved.png
+
+      - name: Read Iloilo City row and update history
+        run: python update.py HeatIndexObserved.png
+
+      - name: Commit changes
+        run: |
+          git config user.name "heat-index-bot"
+          git config user.email "heat-index-bot@users.noreply.github.com"
+          git add history.json
+          git diff --cached --quiet || (git commit -m "Update heat index data" && git push)
