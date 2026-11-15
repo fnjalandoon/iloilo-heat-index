@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: repo-writes
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -34,4 +38,4 @@ jobs:
           git config user.name "heat-index-bot"
           git config user.email "heat-index-bot@users.noreply.github.com"
           git add history.json
-          git diff --cached --quiet || (git commit -m "Update heat index data" && git push)
+          git diff --cached --quiet || (git commit -m "Update heat index data" && git pull --rebase -q && git push)
