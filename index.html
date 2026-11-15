@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Iloilo City Heat Index</title>
+<title>Heat Index Monitor</title>
 <style>
   :root { --navy:#001E62; --gold:#FFC72C; }
   * { box-sizing:border-box; }
@@ -27,51 +27,43 @@
   .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; }
   .legend { font-size:12px; color:#5a6070; line-height:1.7; }
   .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; }
+  .place { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:22px 2px 4px; }
+  .place h2 { font-size:20px; margin:0; color:var(--navy); }
+  .tag { background:#FFC72C; color:#001E62; font-size:12px; font-weight:bold; padding:3px 11px; border-radius:999px; }
+  .tag.home { background:#dfe7fb; }
+  .stn { font-size:12px; color:#5a6070; margin:0 2px 10px; }
+  details summary { cursor:pointer; font-weight:bold; color:var(--navy); font-size:15px; }
+  details table { margin-top:10px; }
   footer { text-align:center; font-size:12px; color:#7a8090; padding:8px 16px 28px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Iloilo City Heat Index</h1>
+  <h1>Heat Index Monitor</h1>
   <p>Highest heat index (&deg;C), from DOST-PAGASA</p>
 </header>
-<main>
-  <div class="card" id="now">Loading...</div>
-  <div class="card"><h2>Daily highest heat index</h2><div id="chart"></div></div>
-  <div class="card"><h2>History</h2><table id="tbl"></table></div>
-  <div class="card legend">
-    <span class="sw" style="background:#f2d600"></span>Caution 27 to 32 &nbsp;
-    <span class="sw" style="background:#ffa726"></span>Extreme Caution 33 to 41 &nbsp;
-    <span class="sw" style="background:#e8590c"></span>Danger 42 to 51 &nbsp;
-    <span class="sw" style="background:#c92a2a"></span>Extreme Danger 52 and up
-  </div>
-</main>
+<main id="main">Loading...</main>
 <footer id="foot"></footer>
 <script>
+const PLACES = {
+  iloilo:    {title:"Iloilo City", tag:"Central Philippine University", cls:"", stn:"PAGASA's Iloilo City station"},
+  lacarlota: {title:"La Carlota City", tag:"Hometown", cls:"home", stn:"PAGASA's La Granja station, La Carlota, Negros Occidental"},
+};
 const LV = [[52,"Extreme Danger","#c92a2a","#fff"],[42,"Danger","#e8590c","#fff"],
             [33,"Extreme Caution","#ffa726","#1b1f2a"],[27,"Caution","#f2d600","#1b1f2a"],
             [0,"Below Caution","#d9dce3","#1b1f2a"]];
 const lv = v => LV.find(l => v >= l[0]);
 const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const val = r => r.observed ?? r.forecast;
 
-fetch("history.json?" + Date.now()).then(r => r.json()).then(h => {
-  const days = Object.entries(h.days);
-  const val = r => r.observed ?? r.forecast;
-  const asOf = h.as_of;
-  const today = h.days[asOf] || {};
-  const l = lv(today.observed ?? 0);
-
+function station(id, st, asOf) {
+  const P = PLACES[id] || {title:st.name, tag:"", cls:"", stn:st.station}, days = Object.entries(st.days);
+  const today = st.days[asOf] || {}, l = lv(today.observed ?? 0);
   const fcs = days.filter(([d,r]) => d > asOf && r.forecast != null);
-  document.getElementById("now").innerHTML =
-    `<div class="big"><div class="num" style="background:${l[2]};color:${l[3]}">${today.observed ?? "--"}&deg;</div>
-     <div><div class="lvl">${l[1]}</div><div class="sub">Highest on ${fmt(asOf)} (computed as of 5:00 PM)</div></div></div>
-     <div class="fc">` + fcs.map(([d,r]) => { const f = lv(r.forecast);
-       return `<div style="background:${f[2]};color:${f[3]}"><span>Forecast ${fmt(d)}</span><b>${r.forecast}&deg;</b><span>${f[1]}</span></div>`; }).join("") + `</div>`;
 
-  // bar chart (inline SVG)
   const rows = days.slice(-30), W = 660, H = 220, pad = 28, bw = (W - pad) / rows.length;
   const max = Math.max(46, ...rows.map(([d,r]) => val(r))), y = v => H - 22 - (v / max) * (H - 40);
-  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Daily heat index">`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Daily heat index, ${P.title}">`;
   [33, 42].forEach(t => svg += `<line x1="${pad}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="#9aa0b0" stroke-dasharray="4 4"/><text x="0" y="${y(t)+4}" font-size="11" fill="#5a6070">${t}</text>`);
   rows.forEach(([d,r], i) => {
     const v = val(r), c = lv(v)[2], x = pad + i * bw, fc = r.observed == null;
@@ -79,16 +71,39 @@ fetch("history.json?" + Date.now()).then(r => r.json()).then(h => {
     svg += `<text x="${x+bw/2}" y="${y(v)-4}" font-size="11" text-anchor="middle" fill="#1b1f2a">${v}</text>`;
     if (rows.length <= 12 || i % 3 === 0) svg += `<text x="${x+bw/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="#5a6070">${fmt(d).replace(" ","")}</text>`;
   });
-  document.getElementById("chart").innerHTML = svg + `</svg><div class="sub">Faded bars are forecasts.</div>`;
+  svg += "</svg>";
 
-  document.getElementById("tbl").innerHTML = "<tr><th>Date</th><th>&deg;C</th><th>Level</th></tr>" +
+  const table = "<table><tr><th>Date</th><th>&deg;C</th><th>Level</th></tr>" +
     days.slice().reverse().map(([d,r]) => { const v = val(r), x = lv(v);
-      return `<tr><td>${fmt(d)}</td><td>${v}${r.observed == null ? " (forecast)" : ""}</td><td><span class="pill" style="background:${x[2]};color:${x[3]}">${x[1]}</span></td></tr>`; }).join("");
+      return `<tr><td>${fmt(d)}</td><td>${v}${r.observed == null ? " (forecast)" : ""}</td><td><span class="pill" style="background:${x[2]};color:${x[3]}">${x[1]}</span></td></tr>`; }).join("") + "</table>";
 
+  return `<section>
+    <div class="place"><h2>${P.title}</h2>${P.tag ? `<span class="tag ${P.cls}">${P.tag}</span>` : ""}</div>
+    <div class="stn">${P.stn}</div>
+    <div class="card">
+      <div class="big"><div class="num" style="background:${l[2]};color:${l[3]}">${today.observed ?? "--"}&deg;</div>
+        <div><div class="lvl">${l[1]}</div><div class="sub">Highest on ${fmt(asOf)} (computed as of 5:00 PM)</div></div></div>
+      <div class="fc">${fcs.map(([d,r]) => { const f = lv(r.forecast);
+        return `<div style="background:${f[2]};color:${f[3]}"><span>Forecast ${fmt(d)}</span><b>${r.forecast}&deg;</b><span>${f[1]}</span></div>`; }).join("")}</div>
+    </div>
+    <div class="card"><h2>Daily highest heat index</h2>${svg}<div class="sub">Faded bars are forecasts.</div></div>
+    <div class="card"><details><summary>History (${days.length} days)</summary>${table}</details></div>
+  </section>`;
+}
+
+fetch("history.json?" + Date.now()).then(r => r.json()).then(h => {
+  const order = ["iloilo", "lacarlota"].filter(id => h.stations[id]).concat(Object.keys(h.stations).filter(id => !PLACES[id]));
+  document.getElementById("main").innerHTML = order.map(id => station(id, h.stations[id], h.as_of)).join("") + `
+    <div class="card legend" style="margin-top:18px">
+      <span class="sw" style="background:#f2d600"></span>Caution 27 to 32 &nbsp;
+      <span class="sw" style="background:#ffa726"></span>Extreme Caution 33 to 41 &nbsp;
+      <span class="sw" style="background:#e8590c"></span>Danger 42 to 51 &nbsp;
+      <span class="sw" style="background:#c92a2a"></span>Extreme Danger 52 and up
+    </div>`;
   document.getElementById("foot").textContent =
     "Updated " + new Date(h.updated).toLocaleString("en-PH", {timeZone:"Asia/Manila"}) +
     " PHT. Values are read automatically from PAGASA's published image. Check pagasa.dost.gov.ph for the official source.";
-}).catch(e => document.getElementById("now").textContent = "Could not load data: " + e);
+}).catch(e => document.getElementById("main").textContent = "Could not load data: " + e);
 </script>
 </body>
 </html>

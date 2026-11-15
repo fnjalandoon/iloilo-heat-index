@@ -1,34 +1,72 @@
 {
- "station": "Iloilo City, Iloilo",
- "days": {
-  "2026-11-09": {
-   "observed": 39
+ "stations": {
+  "iloilo": {
+   "days": {
+    "2026-11-09": {
+     "observed": 39
+    },
+    "2026-11-10": {
+     "observed": 39
+    },
+    "2026-11-11": {
+     "observed": 39
+    },
+    "2026-11-12": {
+     "observed": 42
+    },
+    "2026-11-13": {
+     "observed": 41
+    },
+    "2026-11-14": {
+     "observed": 39
+    },
+    "2026-11-15": {
+     "observed": 39
+    },
+    "2026-11-16": {
+     "forecast": 39
+    },
+    "2026-11-17": {
+     "forecast": 40
+    }
+   },
+   "name": "Iloilo City",
+   "station": "Iloilo City, Iloilo"
   },
-  "2026-11-10": {
-   "observed": 39
-  },
-  "2026-11-11": {
-   "observed": 39
-  },
-  "2026-11-12": {
-   "observed": 42
-  },
-  "2026-11-13": {
-   "observed": 41
-  },
-  "2026-11-14": {
-   "observed": 39
-  },
-  "2026-11-15": {
-   "observed": 39
-  },
-  "2026-11-16": {
-   "forecast": 39
-  },
-  "2026-11-17": {
-   "forecast": 40
+  "lacarlota": {
+   "days": {
+    "2026-11-09": {
+     "observed": 40
+    },
+    "2026-11-10": {
+     "observed": 40
+    },
+    "2026-11-11": {
+     "observed": 41
+    },
+    "2026-11-12": {
+     "observed": 43
+    },
+    "2026-11-13": {
+     "observed": 40
+    },
+    "2026-11-14": {
+     "observed": 38
+    },
+    "2026-11-15": {
+     "observed": 39
+    },
+    "2026-11-16": {
+     "forecast": 38
+    },
+    "2026-11-17": {
+     "forecast": 38
+    }
+   },
+   "name": "La Carlota City",
+   "station": "La Granja, La Carlota, Negros Occidental"
   }
  },
  "as_of": "2026-11-15",
- "updated": "2026-11-15T11:27:40+00:00"
+ "updated": "2026-11-15T13:20:02+00:00"
 }
