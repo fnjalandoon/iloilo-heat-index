@@ -55,7 +55,7 @@ const PLACES = {
   iloilo:    {title:"Iloilo City", tag:"Central Philippine University", cls:"", stn:"PAGASA's Iloilo City station"},
   lacarlota: {title:"La Carlota City", tag:"Hometown", cls:"home", stn:"PAGASA's La Granja station, La Carlota, Negros Occidental"},
 };
-const LV = [[52,"Extreme Danger","#c92a2a","#fff"],[42,"Danger","#e8590c","#fff"],
+const LV = [[52,"Extreme Danger","#9b0f0f","#fff"],[42,"Danger","#ee1c1c","#fff"],
             [33,"Extreme Caution","#ffa726","#1b1f2a"],[27,"Caution","#f2d600","#1b1f2a"],
             [0,"Below Caution","#d9dce3","#1b1f2a"]];
 const lv = v => LV.find(l => v >= l[0]);
@@ -63,8 +63,8 @@ const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-US",{month:"sh
 const val = r => r.observed ?? r.forecast;
 
 
-const LCP = [[42,"Red","#d64545","#fff","Face-to-face classes suspended","Basic education and undergraduate classes are conducted online (synchronous), following the original schedule."],
-             [40,"Yellow","#d8b400","#1b1f2a","Adjusted class schedule","Classes follow the adjusted schedule shown below."],
+const LCP = [[42,"Red","#ee1c1c","#fff","Face-to-face classes suspended","Basic education and undergraduate classes are conducted online (synchronous), following the original schedule."],
+             [40,"Yellow","#ffe000","#1b1f2a","Adjusted class schedule","Classes follow the adjusted schedule shown below."],
              [0,"Green","#1f9d55","#fff","Regular class schedule","Regular class schedules."]];
 const lcp = v => LCP.find(l => v >= l[0]);
 
@@ -138,8 +138,8 @@ fetch("history.json?" + Date.now()).then(r => r.json()).then(h => {
     <div class="card legend" style="margin-top:18px">
       <span class="sw" style="background:#f2d600"></span>Caution 27 to 32 &nbsp;
       <span class="sw" style="background:#ffa726"></span>Extreme Caution 33 to 41 &nbsp;
-      <span class="sw" style="background:#e8590c"></span>Danger 42 to 51 &nbsp;
-      <span class="sw" style="background:#c92a2a"></span>Extreme Danger 52 and up
+      <span class="sw" style="background:#ee1c1c"></span>Danger 42 to 51 &nbsp;
+      <span class="sw" style="background:#9b0f0f"></span>Extreme Danger 52 and up
     </div>`;
   document.getElementById("foot").textContent =
     "Updated " + new Date(h.updated).toLocaleString("en-PH", {timeZone:"Asia/Manila"}) +
