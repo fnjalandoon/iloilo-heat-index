@@ -34,6 +34,12 @@
   .stn { font-size:12px; color:#5a6070; margin:0 2px 10px; }
   details summary { cursor:pointer; font-weight:bold; color:var(--navy); font-size:15px; }
   details table { margin-top:10px; }
+  .lcp h2 { margin-bottom:6px; }
+  .lcp .row { display:flex; gap:8px; margin:10px 0; }
+  .lcp .d { flex:1; border-radius:10px; padding:10px 8px; text-align:center; font-size:12px; }
+  .lcp .d b { display:block; font-size:14px; margin:3px 0; }
+  .lcp .st { font-size:14px; line-height:1.45; padding:10px 12px; border-radius:10px; margin-top:8px; }
+  .lcp table td, .lcp table th { font-size:13px; }
   footer { text-align:center; font-size:12px; color:#7a8090; padding:8px 16px 28px; }
 </style>
 </head>
@@ -55,6 +61,40 @@ const LV = [[52,"Extreme Danger","#c92a2a","#fff"],[42,"Danger","#e8590c","#fff"
 const lv = v => LV.find(l => v >= l[0]);
 const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
 const val = r => r.observed ?? r.forecast;
+
+
+const LCP = [[42,"Red","#d64545","#fff","Face-to-face classes suspended","Basic education and undergraduate classes are conducted online (synchronous), following the original schedule."],
+             [40,"Yellow","#d8b400","#1b1f2a","Adjusted class schedule","Classes follow the adjusted schedule shown below."],
+             [0,"Green","#1f9d55","#fff","Regular class schedule","Regular class schedules."]];
+const lcp = v => LCP.find(l => v >= l[0]);
+
+function lcpCard(st, asOf) {
+  const items = Object.entries(st.days).filter(([d,r]) => d >= asOf && val(r) != null).slice(0, 3);
+  const row = items.map(([d,r]) => { const v = val(r), c = lcp(v);
+    return `<div class="d" style="background:${c[2]};color:${c[3]}"><span>${d === asOf ? "Today" : "Forecast"} ${fmt(d)}</span><b>${v}&deg;C &middot; ${c[1]}</b><span>${c[4]}</span></div>`; }).join("");
+  const t = items[0] ? lcp(val(items[0][1])) : null;
+  return `<div class="card lcp"><h2>CPU Learning Continuity Plan</h2>
+    <div class="sub">Class and work suspension guideline for extreme heat. Based on the highest heat index above.</div>
+    <div class="row">${row}</div>
+    ${t ? `<div class="st" style="background:#eef1fa"><b>${items[0][0] === asOf ? "Today" : fmt(items[0][0])}:</b> ${t[5]}</div>` : ""}
+    <details style="margin-top:10px"><summary>Guideline and adjusted schedules</summary>
+      <table><tr><th>Heat index</th><th>Level</th><th>Status</th></tr>
+        <tr><td>Below 40&deg;C</td><td>Low (Green)</td><td>Regular class schedules.</td></tr>
+        <tr><td>40 to 41&deg;C</td><td>Moderate (Yellow)</td><td>Classes follow the adjusted schedule.</td></tr>
+        <tr><td>42&deg;C and up</td><td>High (Red)</td><td>Face-to-face classes in basic education and undergraduate levels are automatically suspended. Classes run online (synchronous) on the original schedule.</td></tr></table>
+      <div class="sub" style="margin-top:10px"><b>Adjusted schedule (CPU Memo 51a s. 2025)</b></div>
+      <table><tr><th>Morning original</th><th>Adjusted</th></tr>
+        <tr><td>7:00 to 8:30 am</td><td>7:00 to 8:00 am</td></tr><tr><td>8:30 to 10:00 am</td><td>8:00 to 9:00 am</td></tr>
+        <tr><td>10:00 to 11:30 am</td><td>9:00 to 10:00 am</td></tr><tr><td>11:30 am to 1:00 pm</td><td>10:00 to 11:00 am</td></tr></table>
+      <table><tr><th>Afternoon original</th><th>Adjusted</th></tr>
+        <tr><td>1:00 to 2:30 pm</td><td>4:00 to 5:00 pm</td></tr><tr><td>2:30 to 4:00 pm</td><td>5:00 to 6:00 pm</td></tr>
+        <tr><td>4:00 to 5:30 pm</td><td>6:00 to 7:00 pm</td></tr><tr><td>5:40 to 7:10 pm</td><td>7:00 to 8:00 pm</td></tr>
+        <tr><td>7:10 to 8:40 pm</td><td>8:00 to 9:00 pm</td></tr></table>
+      <div class="sub" style="margin-top:10px"><b>Asynchronous activities:</b> 11:00 am to 4:00 pm. Students who stay on campus may use the Henry Luce III Library or the Rose Memorial Auditorium.</div>
+    </details>
+    <div class="sub" style="margin-top:10px">Forecast days are not final. Any decision to suspend face-to-face classes follows the official CPU pronouncements.</div>
+  </div>`;
+}
 
 function station(id, st, asOf) {
   const P = PLACES[id] || {title:st.name, tag:"", cls:"", stn:st.station}, days = Object.entries(st.days);
@@ -86,6 +126,7 @@ function station(id, st, asOf) {
       <div class="fc">${fcs.map(([d,r]) => { const f = lv(r.forecast);
         return `<div style="background:${f[2]};color:${f[3]}"><span>Forecast ${fmt(d)}</span><b>${r.forecast}&deg;</b><span>${f[1]}</span></div>`; }).join("")}</div>
     </div>
+    ${id === "iloilo" ? lcpCard(st, asOf) : ""}
     <div class="card"><h2>Daily highest heat index</h2>${svg}<div class="sub">Faded bars are forecasts.</div></div>
     <div class="card"><details><summary>History (${days.length} days)</summary>${table}</details></div>
   </section>`;
