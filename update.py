@@ -53,8 +53,11 @@ def main(path):
         print(f"{st['name']}: saved {base} {vals}")
     if len(failed) < len(STATIONS):
         hist["as_of"] = base.isoformat()
-        hist["updated"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        HISTORY.write_text(json.dumps(hist, indent=1))
+        old = json.loads(HISTORY.read_text()) if HISTORY.exists() else {}
+        same = {k: v for k, v in old.items() if k != "updated"} == {k: v for k, v in hist.items() if k != "updated"}
+        if not same:
+            hist["updated"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            HISTORY.write_text(json.dumps(hist, indent=1))
     return 1 if failed else 0
 
 

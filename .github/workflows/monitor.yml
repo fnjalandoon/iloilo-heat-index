@@ -2,8 +2,7 @@ name: Update heat index
 
 on:
   schedule:
-    - cron: "0 11 * * *"   # 7:00 PM Philippine time
-    - cron: "0 13 * * *"   # 9:00 PM Philippine time
+    - cron: "*/20 8-15 * * *"   # every 20 min, 4:00 PM to midnight Philippine time
   workflow_dispatch:
 
 permissions:

@@ -49,8 +49,12 @@
   <p>Highest heat index (&deg;C), from DOST-PAGASA</p>
 </header>
 <main id="main">Loading...</main>
+<div style="max-width:720px;margin:0 auto;padding:0 16px"><div class="card"><details><summary>PAGASA's latest table (live)</summary>
+<img id="pg" alt="PAGASA heat index table" style="width:100%;margin-top:10px;border-radius:8px">
+<div class="sub">Loaded straight from PAGASA each time you refresh.</div></details></div></div>
 <footer id="foot"></footer>
 <script>
+document.getElementById("pg").src = "https://pubfiles.pagasa.dost.gov.ph/iaas/heat_index/HeatIndexObserved.png?t=" + Date.now();
 const PLACES = {
   iloilo:    {title:"Iloilo City", tag:"Central Philippine University", cls:"", stn:"PAGASA's Iloilo City station"},
   lacarlota: {title:"La Carlota City", tag:"Hometown", cls:"home", stn:"PAGASA's La Granja station, La Carlota, Negros Occidental"},
