@@ -30,10 +30,13 @@
      "observed": 41
     },
     "2026-11-18": {
-     "forecast": 41
+     "observed": 42
     },
     "2026-11-19": {
-     "forecast": 42
+     "forecast": 41
+    },
+    "2026-11-20": {
+     "forecast": 40
     }
    },
    "name": "Iloilo City",
@@ -69,16 +72,19 @@
      "observed": 41
     },
     "2026-11-18": {
-     "forecast": 41
+     "observed": 42
     },
     "2026-11-19": {
      "forecast": 41
+    },
+    "2026-11-20": {
+     "forecast": 40
     }
    },
    "name": "La Carlota City",
    "station": "La Granja, La Carlota, Negros Occidental"
   }
  },
- "as_of": "2026-11-17",
- "updated": "2026-11-17T14:11:04+00:00"
+ "as_of": "2026-11-18",
+ "updated": "2026-11-18T10:52:08+00:00"
 }
