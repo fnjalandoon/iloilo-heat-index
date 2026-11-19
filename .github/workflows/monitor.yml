@@ -56,7 +56,7 @@ jobs:
         run: python3 notify_heat.py "${{ steps.before.outputs.asof }}"
 
       - name: Test phone alert
-        if: ${{ inputs.test_notification }}
+        if: ${{ always() && inputs.test_notification }}
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: python3 notify_heat.py "TEST"

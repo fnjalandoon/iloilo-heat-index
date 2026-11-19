@@ -1,0 +1,17 @@
+name: Debug PAGASA image
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr
+          mkdir -p debug
+          curl -fsSL -A "Mozilla/5.0" -D debug/headers.txt -o debug/img.png https://pubfiles.pagasa.dost.gov.ph/iaas/heat_index/HeatIndexObserved.png || true
+          file debug/img.png > debug/file.txt
+          tesseract debug/img.png debug/ocr --psm 6 || true
+          git config user.name bot; git config user.email bot@users.noreply.github.com
+          git add debug; git commit -qm "debug image" && git pull --rebase -q && git push
