@@ -70,8 +70,15 @@ def main():
     if len(sys.argv) > 1:
         html = Path(sys.argv[1]).read_text(errors="ignore")
     else:
-        req = urllib.request.Request(URL, headers={"User-Agent": "Mozilla/5.0"})
-        html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "ignore")
+        hdr = {"User-Agent": "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36",
+               "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+               "Accept-Language": "en-US,en;q=0.9", "Referer": "https://cdrrmo.iloilocity.gov.ph/"}
+        try:
+            req = urllib.request.Request(URL, headers=hdr)
+            html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "ignore")
+        except Exception as e:
+            print("could not download the city page:", e)
+            return 0
     new = parse(page_text(html))
     print(f"parsed {len(new)} advisories")
     if not new:
