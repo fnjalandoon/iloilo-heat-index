@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr
-          pip install pytesseract pillow
+          pip install pytesseract pillow numpy
 
       - name: Download PAGASA image
         run: |
