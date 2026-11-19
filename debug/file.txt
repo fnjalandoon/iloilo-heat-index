@@ -1,1 +1,0 @@
-debug/img.png: PNG image data, 2500 x 3550, 8-bit/color RGB, non-interlaced

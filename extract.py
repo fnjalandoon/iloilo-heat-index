@@ -21,11 +21,16 @@ STATIONS = [
 ]
 LEVELS = [(52, "Extreme Danger"), (42, "Danger"), (33, "Extreme Caution"),
           (27, "Caution"), (0, "Not classified")]
-SLOTS = ["d-4", "d-3", "d-2", "d-1", "d0", "fc+1", "fc+2"]
 
-# Column edges as fractions of image width (measured on the 1442px-wide image)
-X0, STEP = 735 / 1442, 99.4 / 1442
-STATION_X = (326 / 1442, 735 / 1442)
+# PAGASA has used two table layouts. Column edges are fractions of image width.
+LAYOUTS = {
+    # 5 observed days plus 2 forecast days (1442 px wide reference)
+    "forecast": {"slots": ["d-4", "d-3", "d-2", "d-1", "d0", "fc+1", "fc+2"],
+                 "x0": 735 / 1442, "step": 99.4 / 1442, "station_x": (326 / 1442, 735 / 1442)},
+    # "5-day Computed": 5 observed days only (1408 px wide reference), from 19 Nov 2026
+    "computed": {"slots": ["d-4", "d-3", "d-2", "d-1", "d0"],
+                 "x0": 833 / 1408, "step": 112.8 / 1408, "station_x": (366 / 1408, 833 / 1408)},
+}
 
 
 def norm(w):
@@ -37,13 +42,26 @@ def level(v):
     return next(n for lo, n in LEVELS if v >= lo)
 
 
-def ocr_station_column(img):
+def strip_lines(crop):
+    """Blank out table grid lines (long dark runs) so OCR reads the station names."""
+    import numpy as np
+    a = np.array(crop) < 120
+    a[a.mean(axis=1) > 0.5, :] = False
+    a[:, a.mean(axis=0) > 0.5] = False
+    return Image.fromarray(np.where(a, 0, 255).astype("uint8"))
+
+
+def ocr_station_column(img, station_x, grid=False):
     W, H = img.size
     y0 = int(H * 0.12)
-    crop = img.crop((int(W * STATION_X[0]), y0, int(W * STATION_X[1]), int(H * 0.97)))
+    crop = img.crop((int(W * station_x[0]), y0, int(W * station_x[1]), int(H * 0.97)))
     s = 3
-    crop = crop.resize((crop.width * s, crop.height * s), Image.LANCZOS).convert("L")
-    crop = crop.point(lambda p: 255 if p > 140 else 0)
+    crop = crop.convert("L")
+    if grid:
+        crop = strip_lines(crop).resize((crop.width * s, crop.height * s), Image.LANCZOS)
+    else:
+        crop = crop.resize((crop.width * s, crop.height * s), Image.LANCZOS)
+        crop = crop.point(lambda p: 255 if p > 140 else 0)
     d = pytesseract.image_to_data(crop, config="--psm 6",
                                   output_type=pytesseract.Output.DICT)
     return d, s, y0
@@ -85,14 +103,17 @@ def extract(path, stations=STATIONS):
     m = re.search(r"As of\s+(\d{1,2}\s+\w+\s+\d{4})", head)
     out = {"as_of": m.group(1) if m else None, "stations": {}}
 
-    col = ocr_station_column(img)
+    grid = bool(re.search(r"computed", head, re.I))
+    lay = LAYOUTS["computed" if grid else "forecast"]
+    X0, STEP, SLOTS = lay["x0"], lay["step"], lay["slots"]
+    col = ocr_station_column(img, lay["station_x"], grid)
     for st in stations:
         res = None
         row = find_row(col, st["keys"])
         if row:
             yc, rh = row
             vals = [read_cell(img, (X0 + k * STEP) * W + 6, (X0 + (k + 1) * STEP) * W - 6, yc, rh)
-                    for k in range(7)]
+                    for k in range(len(SLOTS))]
             if all(v is not None for v in vals):
                 res = [{"slot": s, "hi_c": v, "level": level(v)} for s, v in zip(SLOTS, vals)]
         out["stations"][st["id"]] = res
