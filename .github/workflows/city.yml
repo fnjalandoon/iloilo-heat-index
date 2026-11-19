@@ -1,0 +1,29 @@
+name: Update city heat index
+
+on:
+  schedule:
+    - cron: "*/30 22-23,0-10 * * *"   # every 30 min, 6:00 AM to 6:30 PM Philippine time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-writes
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Iloilo City CDRRMO advisories
+        run: python3 city_heat.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "heat-index-bot"
+          git config user.email "heat-index-bot@users.noreply.github.com"
+          git add city_heat.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Update city heat index" && git pull --rebase -q && git push)

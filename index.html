@@ -100,6 +100,20 @@ function lcpCard(st, asOf) {
   </div>`;
 }
 
+let CITY = [];
+function cityCard() {
+  if (!CITY.length) return "";
+  const last = CITY.slice(-1)[0], l = lv(last.hi), t = new Date(last.at + "+08:00");
+  const when = t.toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"Asia/Manila"});
+  const rows = CITY.slice(-8).reverse().map(r => { const x = lv(r.hi), tt = new Date(r.at + "+08:00");
+    return `<tr><td>${tt.toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"Asia/Manila"})}</td><td>${r.hi}&deg;C</td><td><span class="pill" style="background:${x[2]};color:${x[3]}">${x[1]}</span></td><td>${r.temp ?? "-"}&deg; / ${r.rh ?? "-"}%</td></tr>`; }).join("");
+  return `<div class="card"><h2>Live from the city (CDRRMO)</h2>
+    <div class="big"><div class="num" style="background:${l[2]};color:${l[3]};font-size:42px">${last.hi}&deg;</div>
+      <div><div class="lvl">${l[1]}</div><div class="sub">As of ${when}${last.src ? " &middot; " + last.src : ""}<br>Temp ${last.temp ?? "-"}&deg;C, humidity ${last.rh ?? "-"}%</div></div></div>
+    <details style="margin-top:10px"><summary>Recent city readings</summary><table><tr><th>Time</th><th>Heat index</th><th>Level</th><th>Temp / RH</th></tr>${rows}</table></details>
+    <div class="sub" style="margin-top:8px">From Iloilo City's own sensors and weather apps, posted by the City Disaster Risk Reduction and Management Office. This is not PAGASA's official value, so the CPU plan above still follows PAGASA.</div></div>`;
+}
+
 function station(id, st, asOf) {
   const P = PLACES[id] || {title:st.name, tag:"", cls:"", stn:st.station}, days = Object.entries(st.days);
   const today = st.days[asOf] || {}, l = lv(today.observed ?? 0);
@@ -130,13 +144,14 @@ function station(id, st, asOf) {
       <div class="fc">${fcs.map(([d,r]) => { const f = lv(r.forecast);
         return `<div style="background:${f[2]};color:${f[3]}"><span>Forecast ${fmt(d)}</span><b>${r.forecast}&deg;</b><span>${f[1]}</span></div>`; }).join("")}</div>
     </div>
-    ${id === "iloilo" ? lcpCard(st, asOf) : ""}
+    ${id === "iloilo" ? lcpCard(st, asOf) + cityCard() : ""}
     <div class="card"><h2>Daily highest heat index</h2>${svg}<div class="sub">Faded bars are forecasts.</div></div>
     <div class="card"><details><summary>History (${days.length} days)</summary>${table}</details></div>
   </section>`;
 }
 
-fetch("history.json?" + Date.now()).then(r => r.json()).then(h => {
+fetch("city_heat.json?" + Date.now()).then(r => r.ok ? r.json() : {readings:[]}).catch(() => ({readings:[]}))
+.then(c => { CITY = c.readings || []; return fetch("history.json?" + Date.now()); }).then(r => r.json()).then(h => {
   const order = ["iloilo", "lacarlota"].filter(id => h.stations[id]).concat(Object.keys(h.stations).filter(id => !PLACES[id]));
   document.getElementById("main").innerHTML = order.map(id => station(id, h.stations[id], h.as_of)).join("") + `
     <div class="card legend" style="margin-top:18px">
