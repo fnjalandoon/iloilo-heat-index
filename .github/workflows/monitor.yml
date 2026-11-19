@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "*/20 8-15 * * *"   # every 20 min, 4:00 PM to midnight Philippine time
   workflow_dispatch:
+    inputs:
+      test_notification:
+        description: "Send a test phone alert"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -49,3 +54,9 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: python3 notify_heat.py "${{ steps.before.outputs.asof }}"
+
+      - name: Test phone alert
+        if: ${{ inputs.test_notification }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 notify_heat.py "TEST"
