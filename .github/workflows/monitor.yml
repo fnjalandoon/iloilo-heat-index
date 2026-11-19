@@ -29,6 +29,10 @@ jobs:
           curl -fsSL -A "Mozilla/5.0" -o HeatIndexObserved.png \
             https://pubfiles.pagasa.dost.gov.ph/iaas/heat_index/HeatIndexObserved.png
 
+      - name: Remember the previous day
+        id: before
+        run: echo "asof=$(python3 -c "import json;print(json.load(open('history.json')).get('as_of',''))")" >> "$GITHUB_OUTPUT"
+
       - name: Read Iloilo City row and update history
         run: python update.py HeatIndexObserved.png
 
@@ -38,3 +42,10 @@ jobs:
           git config user.email "heat-index-bot@users.noreply.github.com"
           git add history.json
           git diff --cached --quiet || (git commit -m "Update heat index data" && git pull --rebase -q && git push)
+
+      - name: Phone alert for a new day
+        if: always()
+        continue-on-error: true
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 notify_heat.py "${{ steps.before.outputs.asof }}"
