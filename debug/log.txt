@@ -1,0 +1,2 @@
+Iloilo City: saved 2026-11-21 [42, 40, 40, 40, 41]
+La Carlota City: could not read a plausible row [], skipped
