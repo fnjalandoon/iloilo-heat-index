@@ -42,6 +42,7 @@ jobs:
         run: python update.py HeatIndexObserved.png
 
       - name: Commit changes
+        if: always()
         run: |
           git config user.name "heat-index-bot"
           git config user.email "heat-index-bot@users.noreply.github.com"

@@ -27,6 +27,9 @@ LAYOUTS = {
     # 5 observed days plus 2 forecast days (1442 px wide reference)
     "forecast": {"slots": ["d-4", "d-3", "d-2", "d-1", "d0", "fc+1", "fc+2"],
                  "x0": 735 / 1442, "step": 99.4 / 1442, "station_x": (326 / 1442, 735 / 1442)},
+    # "5-day Computed and 2-day Forecast" with grid lines (1408 px wide reference), from 21 Nov 2026
+    "computed_fc": {"slots": ["d-4", "d-3", "d-2", "d-1", "d0", "fc+1", "fc+2"],
+                    "x0": 718 / 1408, "step": 97.1 / 1408, "station_x": (316 / 1408, 718 / 1408)},
     # "5-day Computed": 5 observed days only (1408 px wide reference), from 19 Nov 2026
     "computed": {"slots": ["d-4", "d-3", "d-2", "d-1", "d0"],
                  "x0": 833 / 1408, "step": 112.8 / 1408, "station_x": (366 / 1408, 833 / 1408)},
@@ -104,7 +107,8 @@ def extract(path, stations=STATIONS):
     out = {"as_of": m.group(1) if m else None, "stations": {}}
 
     grid = bool(re.search(r"computed", head, re.I))
-    lay = LAYOUTS["computed" if grid else "forecast"]
+    has_fc = bool(re.search(r"forecast", head, re.I))
+    lay = LAYOUTS[("computed_fc" if has_fc else "computed") if grid else "forecast"]
     X0, STEP, SLOTS = lay["x0"], lay["step"], lay["slots"]
     col = ocr_station_column(img, lay["station_x"], grid)
     for st in stations:
