@@ -45,7 +45,10 @@
      "observed": 39
     },
     "2026-11-23": {
-     "forecast": 41
+     "forecast": 39
+    },
+    "2026-11-24": {
+     "forecast": 38
     }
    },
    "name": "Iloilo City",
@@ -96,7 +99,10 @@
      "observed": 39
     },
     "2026-11-23": {
-     "forecast": 39
+     "forecast": 38
+    },
+    "2026-11-24": {
+     "forecast": 38
     }
    },
    "name": "La Carlota City",
@@ -104,5 +110,5 @@
   }
  },
  "as_of": "2026-11-22",
- "updated": "2026-11-22T09:39:46+00:00"
+ "updated": "2026-11-22T10:28:57+00:00"
 }
