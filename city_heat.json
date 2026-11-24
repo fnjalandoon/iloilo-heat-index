@@ -183,6 +183,14 @@
    "rh": 77.0,
    "uv": 2.8,
    "src": "AccuWeather"
+  },
+  {
+   "at": "2026-11-24T12:00",
+   "hi": 37,
+   "temp": null,
+   "rh": 67.0,
+   "uv": 6.2,
+   "src": "AccuWeather"
   }
  ]
 }
