@@ -48,7 +48,7 @@
      "observed": 40
     },
     "2026-11-24": {
-     "forecast": 39
+     "observed": 42
     },
     "2026-11-25": {
      "forecast": 40
@@ -105,7 +105,7 @@
      "observed": 40
     },
     "2026-11-24": {
-     "forecast": 40
+     "observed": 40
     },
     "2026-11-25": {
      "forecast": 40
@@ -115,6 +115,6 @@
    "station": "La Granja, La Carlota, Negros Occidental"
   }
  },
- "as_of": "2026-11-23",
- "updated": "2026-11-23T10:28:12+00:00"
+ "as_of": "2026-11-24",
+ "updated": "2026-11-24T09:57:32+00:00"
 }
